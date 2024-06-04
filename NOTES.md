@@ -7,12 +7,12 @@ I've removed support for bookmarks, images, links, outlines.
 
 Since pdfsg outputs graphics contents immediately, I've removed the code for dynamic strings. The result is that pdfsg uses little memory: essentially only for PDF documents and objects, which have a fixed size.
 
-I've replaced flexible arrays by linked lists. Objects are now part of three linked lists: all objects in a document, all objects of the same type, all streams in a page. These list don't need to be traversed frequently, mostly only when the document is closed.
+I've replaced flexible arrays with linked lists. Objects are now part of three linked lists: all objects in a document, all objects of the same type, all streams in a page. These list don't need to be traversed frequently, mostly only when the document is closed.
 
 I've kept the very nice PDF core in pdfgen, especially the arrays of linked lists indexed by object types. This architecture is very flexible and makes adding new types an easy task.
 
-To support immediate graphics, I've added objects of type length, which store the length of streams. (PDF is designed to allow such lengths to be indirect objects precisely for immediate graphics.)
-When a new page is created, both one stream and one length object are created.
+To support immediate graphics, I've added objects of type length, which store the length of streams. (PDF is designed to allow stream lengths to be indirect objects precisely to allow immediate graphics.)
+When a new page is created, one new stream and one new length object are created.
 The stream is automatically closed when another page or another group is created.
 Once pdfsg had standalone streams, it was natural to add groups to the API.
 Groups can be reused in any page without duplication.
@@ -23,8 +23,6 @@ The API in pdfsg differs from the API in pdfgen. Here are the main differences:
 - pages are never passed as arguments, only the pdf document, except for 
 pdf_addgroup.
 - color especification uses explicit RGB.
-
-The rest of the API in pdfsg is the standard for modern 2d graphics, which are all based on the PDF imaging model. There are also several convenience functions.
 
 Here is the structure of a typical program using pdfsg:
 ```
@@ -44,3 +42,4 @@ Here is the structure of a typical program using pdfsg:
 
     pdf_enddoc(pdf);
 ```
+The rest of the API in pdfsg is the standard for modern 2d graphics, which is based on the PDF imaging model. There are also several convenience functions.
