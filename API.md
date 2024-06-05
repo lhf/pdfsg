@@ -2,14 +2,16 @@
 
 Only one group is active at any given time.
 
-All pages are active to receive new groups.
+All pages remain active to receive new groups.
 
 ## Document management
 ```
 struct pdf_doc *pdf_newdoc(const char *filename);
 ```
 Creates a new document in the given file.
-Returns NULL if fails to open the file.
+Returns NULL if it fails to open it.
+Returns a pointer that should be used in all other functions.
+
 
 ```
 int pdf_newpage(struct pdf_doc *pdf, float width, float height, const char *label);
@@ -47,6 +49,7 @@ Closes any previous group that is open.
 ```
 void pdf_addgroup(struct pdf_doc *pdf, int p, int g);
 ```
+Add the group `g` to the page `p`. Does nothing if there is no such group or page.
 
 ## Graphics core primitives
 These primitives are the standard ones and need no explanation.
@@ -167,6 +170,7 @@ void pdf_translate(struct pdf_doc *pdf, float x, float y);
 ```
 void pdf_rotate(struct pdf_doc *pdf, float angle);
 ```
+The angle is in degrees.
 
 ```
 void pdf_line(struct pdf_doc *pdf, float x1, float y1, float x2, float y2);
@@ -200,6 +204,7 @@ void pdf_circle(struct pdf_doc *pdf, float x, float y, float r);
 void pdf_text(struct pdf_doc *pdf, const char *text, int font, float size, float x, float y, float angle);
 ```
 If font is 0, then use the current font.
+The angle is in degrees.
 
 ```
 void pdf_addraw(struct pdf_doc *pdf, const char *code);
