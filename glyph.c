@@ -107,6 +107,23 @@ int main(void)
     pdf_fillstroke(pdf);
     pdf_addgroup(pdf,p,g);
 
+    p=pdf_newpage(pdf,L,L,"transparency");
+    pdf_concat(pdf,1,0,0,1,0,140);
+    pdf_setfill(pdf,0.0,0.0,0.4);
+    pdf_setfont(pdf,"Times-Roman");
+    pdf_text(pdf,"g",0,512,0,0,0);
+    pdf_setfont(pdf,"Helvetica");
+    pdf_text(pdf,"clip",0,24,L-80,0,0);
+    pdf_setfill(pdf,0.6,0.61,0.26);
+    pdf_save(pdf);
+    pdf_circle(pdf,120,155,100);
+    pdf_clip(pdf);
+    pdf_setfill(pdf,0.6,0.61,0.26);
+    pdf_setfont(pdf,"Times-Roman");
+    pdf_text(pdf,"g",0,512,0,0,0);
+    pdf_restore(pdf);
+    pdf_addgroup(pdf,p,g);
+
     pdf_enddoc(pdf);
     return 0;
 }
