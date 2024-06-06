@@ -1,10 +1,14 @@
 # pdfsg API
 
-Only one group is active at any given time.
+pdfsg is a simple graphics library. It provides a standard modern 2d graphics API and several convenience functions.
 
-All pages remain active to receive new groups.
+## Errors
+There is no error handling.
+Arguments are not checked for correctness but the library does not abort with incorrect arguments, except that pointers should never be NULL.
+The only fatal error is running out of memory.
 
-## Document management
+## Documents
+
 ```
 struct pdf_doc *pdf_newdoc(const char *filename);
 ```
@@ -12,25 +16,25 @@ Creates a new document in the given file.
 Returns NULL if it fails to open it.
 Returns a pointer that should be used in all other functions.
 
-
-```
-int pdf_newpage(struct pdf_doc *pdf, float width, float height, const char *label);
-```
-Creates a new page with the given dimensions and label.
-Creates an anonymous group for graphics contents.
-Closes any previous group that is open.
-Returns an opaque ID that can be used in `pdf_addgroup`.
-
-```
-void pdf_setinfo(struct pdf_doc *pdf, const char *info);
-```
-Set document info. Use PDF syntax.
-
 ```
 int pdf_enddoc(struct pdf_doc *pdf);
 ```
 Finishes and closes the PDF file.
-Returns 0 if success, non-zero if failure to write the file.
+Returns 0 if success and non-zero when it fails to write the file.
+
+```
+void pdf_setinfo(struct pdf_doc *pdf, const char *info);
+```
+Set document info. Use PDF syntax like `/Author (John Doe)`.
+
+```
+int pdf_newpage(struct pdf_doc *pdf, float width, float height, const char *label);
+```
+Creates a new page with the given dimensions in PDF units and an informative label.
+Creates an anonymous group for graphics contents.
+Closes any previous group that is open.
+Returns an opaque ID that can be used in `pdf_addgroup`.
+All pages remain active to receive new groups until the document is closed.
 
 ## Groups
 
@@ -38,8 +42,10 @@ Returns 0 if success, non-zero if failure to write the file.
 int pdf_newgroup(struct pdf_doc *pdf);
 ```
 Creates a new group for graphics contents and make it current.
+Only one group is active at any given time.
 Closes any previous group that is open.
 Returns an opaque ID that can be used in `pdf_addgroup`.
+Group contents are reused without duplication.
 
 ```
 void pdf_endgroup(struct pdf_doc *pdf);
@@ -106,7 +112,7 @@ void pdf_save(struct pdf_doc *pdf);
 void pdf_restore(struct pdf_doc *pdf);
 ```
 
-# Graphics core attributes
+## Graphics core attributes
 
 ```
 int pdf_setfont(struct pdf_doc *pdf, const char *font);
@@ -209,5 +215,5 @@ The angle is in degrees.
 ```
 void pdf_addraw(struct pdf_doc *pdf, const char *code);
 ```
-For the adventurous.
+Adds raw code. For the adventurous. Mostly meant for testing.
 
