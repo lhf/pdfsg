@@ -2,13 +2,12 @@
 * pdfsg.c
 * simple graphics library for PDF
 * Luiz Henrique de Figueiredo <lhf@tecgraf.puc-rio.br>
-* 05 Jun 2024 07:51:21
+* 06 Jun 2024 10:09:03
 * This code is hereby placed in the public domain and also under the MIT license
 * Based on public domain code by Andre Renaud: github.com/AndreRenaud/PDFGen
 */
 
 #include <math.h>
-#include <stddef.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -138,7 +137,7 @@ static int pdf_save_object(struct pdf_doc *pdf, struct pdf_obj *obj)
         fprintf(fp, TAB1 "/Type /Font" EOL);
         fprintf(fp, TAB1 "/Subtype /Type1" EOL);
         fprintf(fp, TAB1 "/BaseFont /%s" EOL, obj->font.name);
-      /*fprintf(fp, TAB1 "/Encoding /WinAnsiEncoding" EOL); */
+     /* fprintf(fp, TAB1 "/Encoding /WinAnsiEncoding" EOL); */
         fprintf(fp, ">>" EOL);
         break;
 
@@ -311,7 +310,6 @@ int pdf_enddoc(struct pdf_doc *pdf)
     fprintf(fp, TAB1 "/Size %d" EOL, xref_count + 1);
     fprintf(fp, TAB1 "/Root %d 0 R" EOL, pdf->first[OBJ_catalog]->index);
     fprintf(fp, TAB1 "/Info %d 0 R" EOL, pdf->first[OBJ_info]->index);
-    /* Generate document unique IDs */
     {
     unsigned long id1, id2;
     time_t now = time(NULL);
@@ -409,7 +407,7 @@ void pdf_conicto(struct pdf_doc *pdf, float x1, float y1, float x2, float y2)
     float yc1 = (y0+2.0*y1)/3.0;
     float xc2 = (x2+2.0*x1)/3.0;
     float yc2 = (y2+2.0*y1)/3.0;
-    pdf_curveto(pdf, xc1, yc1, xc2, yc2, x2, y2);
+    pdf_curveto(pdf,xc1,yc1,xc2,yc2,x2,y2);
     x0=x2; y0=y2;
 }
 
@@ -513,12 +511,12 @@ void pdf_setcolor(struct pdf_doc *pdf, float r, float g, float b, float a)
 
 void pdf_scale(struct pdf_doc *pdf, float x, float y)
 {
-    pdf_concat(pdf, x,0,0,y,0,0);
+    pdf_concat(pdf,x,0,0,y,0,0);
 }
 
 void pdf_translate(struct pdf_doc *pdf, float x, float y)
 {
-    pdf_concat(pdf, 1,0,0,1,x,y);
+    pdf_concat(pdf,1,0,0,1,x,y);
 }
 
 void pdf_rotate(struct pdf_doc *pdf, float angle)
@@ -548,14 +546,14 @@ void pdf_quad(struct pdf_doc *pdf, float x1, float y1, float x2, float y2, float
 void pdf_polyline(struct pdf_doc *pdf, float x[], float y[], int n)
 {
     int i;
-    pdf_moveto(pdf, x[0], y[0]);
+    pdf_moveto(pdf,x[0],y[0]);
     for (i = 1; i < n; i++)
-        pdf_lineto(pdf, x[i], y[i]);
+        pdf_lineto(pdf,x[i],y[i]);
 }
 
 void pdf_polygon(struct pdf_doc *pdf, float x[], float y[], int n)
 {
-    pdf_polyline(pdf, x, y, n);
+    pdf_polyline(pdf,x,y,n);
     pdf_closepath(pdf);
 }
 
@@ -579,7 +577,7 @@ void pdf_ellipse(struct pdf_doc *pdf, float x, float y, float xr, float yr)
 
 void pdf_circle(struct pdf_doc *pdf, float x, float y, float r)
 {
-    pdf_ellipse(pdf, x, y, r, r);
+    pdf_ellipse(pdf,x,y,r,r);
 }
 
 void pdf_text(struct pdf_doc *pdf, const char *text, int font, float size, float x, float y, float angle)
