@@ -1,13 +1,12 @@
 #include <stdio.h>
-
 #include "pdfsg.h"
 
 int main(void)
 {
     int L=400;
     int p,g;
-    const char *output = "output.pdf";
-    struct pdf_doc *pdf = pdf_newdoc(output);
+    const char *output="output.pdf";
+    struct pdf_doc *pdf=pdf_newdoc(output);
     if (pdf==NULL) { perror(output); return 1; }
 
     p=pdf_newpage(pdf,L,L,"glyph as text");
@@ -107,7 +106,7 @@ int main(void)
     pdf_fillstroke(pdf);
     pdf_addgroup(pdf,p,g);
 
-    p=pdf_newpage(pdf,L,L,"transparency");
+    p=pdf_newpage(pdf,L,L,"clipping");
     pdf_concat(pdf,1,0,0,1,0,140);
     pdf_setfill(pdf,0.0,0.0,0.4);
     pdf_setfont(pdf,"Times-Roman");
