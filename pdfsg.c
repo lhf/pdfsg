@@ -30,7 +30,6 @@ static void *alloc(size_t s)
 }
 
 enum {
-    OBJ_none,
     OBJ_catalog,
     OBJ_font,
     OBJ_info,
@@ -81,7 +80,7 @@ static struct pdf_obj *pdf_add_object(struct pdf_doc *pdf, int type)
 {
     struct pdf_obj *obj = new(struct pdf_obj);
     obj->type = type;
-    obj->index = pdf->index++;
+    obj->index = ++pdf->index;
     append(obj,succ,pdf->head,pdf->tail);
     append(obj,next,pdf->first[obj->type],pdf->last[obj->type]);
     return obj;
@@ -102,23 +101,17 @@ static struct pdf_obj *find_object(struct pdf_doc *pdf, int index, int type)
 #define TAB2	TAB1 TAB1
 #define TAB3	TAB1 TAB1 TAB1
 
-static int pdf_save_object(struct pdf_doc *pdf, struct pdf_obj *obj)
+static void pdf_save_object(struct pdf_doc *pdf, struct pdf_obj *obj)
 {
     FILE *fp = pdf->fp;
 
-    if (obj->type == OBJ_none)
-        return 0;
-    if (obj->offset != 0)
-        return 1;
+    if (obj->offset != 0) return;
 
     obj->offset = ftell(fp);
     fprintf(fp, "%d 0 obj" EOL, obj->index);
     switch (obj->type) {
     struct pdf_obj *o;
     int i;
-
-    case OBJ_none:
-        break;
 
     case OBJ_catalog:
         fprintf(fp, "<<" EOL);
@@ -205,13 +198,11 @@ static int pdf_save_object(struct pdf_doc *pdf, struct pdf_obj *obj)
 
     }
     fprintf(fp, "endobj" EOL);
-    return 1;
 }
 
 static struct pdf_doc *pdf_create(void)
 {
     struct pdf_doc *pdf = new(struct pdf_doc);
-    pdf_add_object(pdf, OBJ_none);
     pdf_add_object(pdf, OBJ_catalog);
     pdf_add_object(pdf, OBJ_pages);
     pdf_add_object(pdf, OBJ_info);
@@ -291,30 +282,28 @@ static unsigned long hash(unsigned long hash, const void *data, size_t len)
 int pdf_enddoc(struct pdf_doc *pdf)
 {
     struct pdf_obj *obj;
-    long xref_offset;
-    int xref_count = 0;
+    long offset;
     FILE *fp = pdf->fp;
     pdf_endgroup(pdf);
     for (obj = pdf->head; obj; obj = obj->succ)
-        xref_count += pdf_save_object(pdf, obj);
-    xref_offset = ftell(fp);
+        pdf_save_object(pdf, obj);
+    offset = ftell(fp);
     fprintf(fp, "xref" EOL);
-    fprintf(fp, "0 %d" EOL, xref_count + 1);
+    fprintf(fp, "0 %d" EOL, pdf->index + 1);
     fprintf(fp, "0000000000 65535 f" EOL);
     for (obj = pdf->head; obj; obj = obj->succ) {
-        if (obj->type != OBJ_none)
-            fprintf(fp, "%10.10ld 00000 n" EOL, obj->offset);
+        fprintf(fp, "%10.10ld 00000 n" EOL, obj->offset);
     }
     fprintf(fp, "trailer" EOL);
     fprintf(fp, "<<" EOL);
-    fprintf(fp, TAB1 "/Size %d" EOL, xref_count + 1);
+    fprintf(fp, TAB1 "/Size %d" EOL, pdf->index + 1);
     fprintf(fp, TAB1 "/Root %d 0 R" EOL, pdf->first[OBJ_catalog]->index);
     fprintf(fp, TAB1 "/Info %d 0 R" EOL, pdf->first[OBJ_info]->index);
     {
     unsigned long id1, id2;
     time_t now = time(NULL);
     obj = pdf->first[OBJ_info];
-    id1 = xref_count;
+    id1 = pdf->index;
     id1 = hash(id1, obj->info, sizeof(obj->info));
     id1 = hash(id1, &now, sizeof(now));
     id2 = hash(id1, pdf, sizeof(*pdf));
@@ -323,7 +312,7 @@ int pdf_enddoc(struct pdf_doc *pdf)
     }
     fprintf(fp, ">>" EOL);
     fprintf(fp, "startxref" EOL);
-    fprintf(fp, "%ld" EOL, xref_offset);
+    fprintf(fp, "%ld" EOL, offset);
     fprintf(fp, "%%%%EOF" EOL);
     {
     int rc = 0;
