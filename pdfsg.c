@@ -2,7 +2,7 @@
 * pdfsg.c
 * simple graphics library for PDF
 * Luiz Henrique de Figueiredo <lhf@tecgraf.puc-rio.br>
-* 06 Jun 2024 10:09:03
+* 04 Sep 2024 13:01:01
 * This code is hereby placed in the public domain and also under the MIT license
 * Based on public domain code by Andre Renaud: github.com/AndreRenaud/PDFGen
 */
@@ -18,7 +18,7 @@
 #define MYNAME		"pdfsg"
 #define append(N,L,H,T)	do { if (!H) H=T=N; else T=T->L=N; } while (0)
 #define new(t)		(t *) alloc(sizeof(t))
-#define strcopy(d,s)	strncpy(d,s,sizeof(d))[sizeof(d)-1]='\0'
+#define strcopy(d,s)	strncpy(d,s,sizeof(d)-1)[sizeof(d)-1]='\0'
 
 static void *alloc(size_t s)
 {
@@ -136,10 +136,8 @@ static void pdf_save_object(struct pdf_doc *pdf, struct pdf_obj *obj)
 
     case OBJ_info: {
         time_t now = time(NULL);
-        struct tm tm;
         char b[32];
-        localtime_r(&now, &tm);
-        strftime(b, sizeof(b), "%Y%m%d%H%M%S%z", &tm);
+        strftime(b, sizeof(b), "%Y%m%d%H%M%S%z", localtime(&now));
         fprintf(fp, "<<" EOL);
         if (obj->info[0])
             fprintf(fp, TAB1 "%s" EOL, obj->info);
@@ -211,9 +209,11 @@ static struct pdf_doc *pdf_create(void)
 
 static void pdf_destroy(struct pdf_doc *pdf)
 {
-    struct pdf_obj *obj;
-    for (obj = pdf->head; obj; obj = obj->succ)
-        free(obj);
+    struct pdf_obj *obj = pdf->head;
+    struct pdf_obj *o;
+    while (obj != NULL) {
+        o = obj->succ; free(obj); obj = o;
+    }
     free(pdf);
 }
 
@@ -291,9 +291,8 @@ int pdf_enddoc(struct pdf_doc *pdf)
     fprintf(fp, "xref" EOL);
     fprintf(fp, "0 %d" EOL, pdf->index + 1);
     fprintf(fp, "0000000000 65535 f" EOL);
-    for (obj = pdf->head; obj; obj = obj->succ) {
+    for (obj = pdf->head; obj; obj = obj->succ)
         fprintf(fp, "%10.10ld 00000 n" EOL, obj->offset);
-    }
     fprintf(fp, "trailer" EOL);
     fprintf(fp, "<<" EOL);
     fprintf(fp, TAB1 "/Size %d" EOL, pdf->index + 1);
