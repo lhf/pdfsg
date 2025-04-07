@@ -2,7 +2,7 @@
 * pdfsg.c
 * simple graphics library for PDF
 * Luiz Henrique de Figueiredo <lhf@tecgraf.puc-rio.br>
-* 04 Sep 2024 13:01:01
+* 07 Apr 2025 18:09:30
 * This code is hereby placed in the public domain and also under the MIT license
 * Based on public domain code by Andre Renaud: github.com/AndreRenaud/PDFGen
 */
@@ -344,6 +344,7 @@ static void pdf_endstream(struct pdf_doc *pdf)
     struct pdf_obj *obj = pdf->last[OBJ_length];
     obj->length = ftell(pdf->fp)-(pdf->offset);
     fprintf(pdf->fp, "endstream" EOL);
+    fprintf(pdf->fp, "endobj" EOL);
     pdf->offset = 0;
 }
 
