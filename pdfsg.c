@@ -2,7 +2,7 @@
 * pdfsg.c
 * simple graphics library for PDF
 * Luiz Henrique de Figueiredo <lhf@tecgraf.puc-rio.br>
-* 07 Apr 2025 18:09:30
+* 09 Apr 2025 08:58:19
 * This code is hereby placed in the public domain and also under the MIT license
 * Based on public domain code by Andre Renaud: github.com/AndreRenaud/PDFGen
 */
@@ -270,11 +270,9 @@ int pdf_setfont(struct pdf_doc *pdf, const char *font)
 
 static unsigned long hash(unsigned long hash, const void *data, size_t len)
 {
-    const unsigned char *d8 = (const unsigned char *) data;
+    const unsigned char *d = (const unsigned char *) data;
     for (; len; len--) {
-        hash = (((hash & 0x03ffffffffffffff) << 5) +
-                (hash & 0x7fffffffffffffff)) +
-               *d8++;
+        hash = ((hash << 5) + hash) + *d++;
     }
     return hash;
 }
@@ -330,11 +328,12 @@ int pdf_enddoc(struct pdf_doc *pdf)
 static int pdf_newstream(struct pdf_doc *pdf)
 {
     struct pdf_obj *obj = pdf_add_object(pdf, OBJ_stream);
+    struct pdf_obj *len = pdf_add_object(pdf, OBJ_length);
     obj->offset = ftell(pdf->fp);
     fprintf(pdf->fp, "%d 0 obj" EOL, obj->index);
-    fprintf(pdf->fp, "<< /Length %d 0 R >>" EOL "stream" EOL, obj->index+1);
+    fprintf(pdf->fp, "<< /Length %d 0 R >>" EOL, len->index);
+    fprintf(pdf->fp, "stream" EOL);
     pdf->offset = ftell(pdf->fp);
-    pdf_add_object(pdf, OBJ_length);
     x0 = y0 = 0.0;
     return obj->index;
 }
@@ -343,9 +342,9 @@ static void pdf_endstream(struct pdf_doc *pdf)
 {
     struct pdf_obj *obj = pdf->last[OBJ_length];
     obj->length = ftell(pdf->fp)-(pdf->offset);
+    pdf->offset = 0;
     fprintf(pdf->fp, "endstream" EOL);
     fprintf(pdf->fp, "endobj" EOL);
-    pdf->offset = 0;
 }
 
 void pdf_endgroup(struct pdf_doc *pdf)
@@ -375,19 +374,19 @@ void pdf_concat(struct pdf_doc *pdf, float a, float b, float c, float d, float x
 void pdf_moveto(struct pdf_doc *pdf, float x1, float y1)
 {
     fprintf(pdf->fp, "%f %f m" EOL, x1,y1);
-    x0=x1; y0=y1;
+    x0 = x1; y0 = y1;
 }
 
 void pdf_lineto(struct pdf_doc *pdf, float x1, float y1)
 {
     fprintf(pdf->fp, "%f %f l" EOL, x1,y1);
-    x0=x1; y0=y1;
+    x0 = x1; y0 = y1;
 }
 
 void pdf_curveto(struct pdf_doc *pdf, float x1, float y1, float x2, float y2, float x3, float y3)
 {
     fprintf(pdf->fp, "%f %f %f %f %f %f c" EOL, x1,y1,x2,y2,x3,y3);
-    x0=x3; y0=y3;
+    x0 = x3; y0 = y3;
 }
 
 void pdf_conicto(struct pdf_doc *pdf, float x1, float y1, float x2, float y2)
@@ -397,7 +396,7 @@ void pdf_conicto(struct pdf_doc *pdf, float x1, float y1, float x2, float y2)
     float xc2 = (x2+2.0*x1)/3.0;
     float yc2 = (y2+2.0*y1)/3.0;
     pdf_curveto(pdf,xc1,yc1,xc2,yc2,x2,y2);
-    x0=x2; y0=y2;
+    x0 = x2; y0 = y2;
 }
 
 void pdf_rectangle(struct pdf_doc *pdf, float x, float y, float width, float height)
@@ -528,8 +527,7 @@ void pdf_triangle(struct pdf_doc *pdf, float x1, float y1, float x2, float y2, f
 
 void pdf_quad(struct pdf_doc *pdf, float x1, float y1, float x2, float y2, float x3, float y3, float x4, float y4)
 {
-    fprintf(pdf->fp, "%f %f m %f %f l %f %f l %f %f l h" EOL,
-        x1, y1, x2, y2, x3, y3, x4, y4);
+    fprintf(pdf->fp, "%f %f m %f %f l %f %f l %f %f l h" EOL, x1, y1, x2, y2, x3, y3, x4, y4);
 }
 
 void pdf_polyline(struct pdf_doc *pdf, float x[], float y[], int n)
@@ -587,7 +585,7 @@ void pdf_text(struct pdf_doc *pdf, const char *text, int font, float size, float
 
 void pdf_addraw(struct pdf_doc *pdf, const char *code)
 {
-    fprintf(pdf->fp, "%s", code);
+    fprintf(pdf->fp, "%s ", code);
 }
 
 #undef MYNAME
