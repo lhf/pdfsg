@@ -13,6 +13,7 @@ void pdf_curveto(struct pdf_doc *pdf, float x1, float y1, float x2, float y2, fl
 void pdf_conicto(struct pdf_doc *pdf, float x1, float y1, float x2, float y2);
 void pdf_rectangle(struct pdf_doc *pdf, float x, float y, float width, float height);
 void pdf_closepath(struct pdf_doc *pdf);
+void pdf_setevenodd(struct pdf_doc *pdf, int v);
 void pdf_fill(struct pdf_doc *pdf);
 void pdf_stroke(struct pdf_doc *pdf);
 void pdf_fillstroke(struct pdf_doc *pdf);
@@ -39,5 +40,5 @@ void pdf_polyline(struct pdf_doc *pdf, float x[], float y[], int n);
 void pdf_polygon(struct pdf_doc *pdf, float x[], float y[], int n);
 void pdf_ellipse(struct pdf_doc *pdf, float x, float y, float xr, float yr);
 void pdf_circle(struct pdf_doc *pdf, float x, float y, float r);
-void pdf_text(struct pdf_doc *pdf, const char *text, int font, float size, float x, float y, float angle);
+void pdf_text(struct pdf_doc *pdf, const char *text, int font, float size, float x, float y, float angle, int mode);
 void pdf_addraw(struct pdf_doc *pdf, const char *code);

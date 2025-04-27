@@ -2,7 +2,7 @@
 * pdfsg.c
 * simple graphics library for PDF
 * Luiz Henrique de Figueiredo <lhf@tecgraf.puc-rio.br>
-* 09 Apr 2025 08:58:19
+* 13 Apr 2025 11:35:14
 * This code is hereby placed in the public domain and also under the MIT license
 * Based on public domain code by Andre Renaud: github.com/AndreRenaud/PDFGen
 */
@@ -73,6 +73,7 @@ struct pdf_doc {
     long offset;     /* of current stream */
     float x0,y0;
     int font;
+    int evenodd;
     FILE *fp;
 };
 
@@ -290,7 +291,7 @@ int pdf_enddoc(struct pdf_doc *pdf)
     fprintf(fp, "0 %d" EOL, pdf->index + 1);
     fprintf(fp, "0000000000 65535 f" EOL);
     for (obj = pdf->head; obj; obj = obj->succ)
-        fprintf(fp, "%10.10ld 00000 n" EOL, obj->offset);
+        fprintf(fp, "%010ld 00000 n" EOL, obj->offset);
     fprintf(fp, "trailer" EOL);
     fprintf(fp, "<<" EOL);
     fprintf(fp, TAB1 "/Size %d" EOL, pdf->index + 1);
@@ -409,9 +410,14 @@ void pdf_closepath(struct pdf_doc *pdf)
     fprintf(pdf->fp, "h" EOL);
 }
 
+void pdf_setevenodd(struct pdf_doc *pdf, int v)
+{
+    pdf->evenodd = v;
+}
+
 void pdf_fill(struct pdf_doc *pdf)
 {
-    fprintf(pdf->fp, "f" EOL);
+    fprintf(pdf->fp, pdf->evenodd ? "f*" EOL : "f" EOL);
 }
 
 void pdf_stroke(struct pdf_doc *pdf)
@@ -421,7 +427,7 @@ void pdf_stroke(struct pdf_doc *pdf)
 
 void pdf_fillstroke(struct pdf_doc *pdf)
 {
-    fprintf(pdf->fp, "B" EOL);
+    fprintf(pdf->fp, pdf->evenodd ? "B*" EOL : "B" EOL);
 }
 
 void pdf_setopacity(struct pdf_doc *pdf, float v)
@@ -475,7 +481,7 @@ void pdf_setdash(struct pdf_doc *pdf, float a[], int n, int d)
 
 void pdf_clip(struct pdf_doc *pdf)
 {
-    fprintf(pdf->fp, "W n" EOL);
+    fprintf(pdf->fp, pdf->evenodd ? "W* n" EOL : "W n" EOL);
 }
 
 void pdf_save(struct pdf_doc *pdf)
@@ -489,6 +495,8 @@ void pdf_restore(struct pdf_doc *pdf)
 }
 
 /* PDF external graphics (convenience) ===================================== */
+
+#define DEGREES 0.017453292519943
 
 void pdf_setcolor(struct pdf_doc *pdf, float r, float g, float b, float a)
 {
@@ -509,7 +517,7 @@ void pdf_translate(struct pdf_doc *pdf, float x, float y)
 
 void pdf_rotate(struct pdf_doc *pdf, float angle)
 {
-    angle *= 0.017453292519943;
+    angle *= DEGREES;
     pdf_concat(pdf,
                 cosf(angle), sinf(angle),
                -sinf(angle), cosf(angle), 0, 0);
@@ -567,17 +575,18 @@ void pdf_circle(struct pdf_doc *pdf, float x, float y, float r)
     pdf_ellipse(pdf,x,y,r,r);
 }
 
-void pdf_text(struct pdf_doc *pdf, const char *text, int font, float size, float x, float y, float angle)
+void pdf_text(struct pdf_doc *pdf, const char *text, int font, float size, float x, float y, float angle, int mode)
 {
     fprintf(pdf->fp, "BT" EOL);
+    fprintf(pdf->fp, TAB1 "%d Tr" EOL, mode);
     if (font==0) font = pdf->font;
     if (angle != 0) {
-        angle *= 0.017453292519943;
+        angle *= DEGREES;
         fprintf(pdf->fp, TAB1 "%f %f %f %f %f %f Tm" EOL,
                  cosf(angle), sinf(angle),
                 -sinf(angle), cosf(angle), x, y);
     } else
-        fprintf(pdf->fp, TAB1 "%f %f TD" EOL, x, y);
+        fprintf(pdf->fp, TAB1 "%f %f Td" EOL, x, y);
     fprintf(pdf->fp, TAB1 "/F%d %f Tf" EOL, font, size);
     fprintf(pdf->fp, TAB1 "(%s) Tj" EOL, text);
     fprintf(pdf->fp, "ET" EOL);
@@ -585,7 +594,7 @@ void pdf_text(struct pdf_doc *pdf, const char *text, int font, float size, float
 
 void pdf_addraw(struct pdf_doc *pdf, const char *code)
 {
-    fprintf(pdf->fp, "%s ", code);
+    fprintf(pdf->fp, "%s", code);
 }
 
 #undef MYNAME

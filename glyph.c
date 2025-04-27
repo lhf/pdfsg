@@ -1,3 +1,5 @@
+/* glyph.c -- demo for pdfsg */
+
 #include <stdio.h>
 #include "pdfsg.h"
 
@@ -10,12 +12,12 @@ int main(void)
     if (pdf==NULL) { perror(output); return 1; }
 
     p=pdf_newpage(pdf,L,L,"glyph as text");
-    pdf_concat(pdf,1,0,0,1,0,140);
+    pdf_translate(pdf,0,140);
     pdf_setfill(pdf,0.0,0.0,0.4);
     pdf_setfont(pdf,"Times-Roman");
-    pdf_text(pdf,"g",0,512,0,0,0);
+    pdf_text(pdf,"g",0,512,0,0,0,0);
     pdf_setfont(pdf,"Helvetica");
-    pdf_text(pdf,"text",0,24,L-80,0,0);
+    pdf_text(pdf,"text",0,24,L-80,0,0,0);
 
     g=pdf_newgroup(pdf);
     pdf_circle(pdf,L-50,-L/4,10);
@@ -23,11 +25,21 @@ int main(void)
     pdf_endgroup(pdf);
     pdf_addgroup(pdf,p,g);
 
+    p=pdf_newpage(pdf,L,L,"glyph as text both");
+    pdf_translate(pdf,0,140);
+    pdf_setfill(pdf,0.8,0.8,0.8);
+    pdf_setstroke(pdf,1.0,0.0,0.0);
+    pdf_setfont(pdf,"Times-Roman");
+    pdf_text(pdf,"g",0,512,0,0,0,2);
+    pdf_setfont(pdf,"Helvetica");
+    pdf_text(pdf,"text mode",0,24,L-120,0,0,1);
+    pdf_addgroup(pdf,p,g);
+
     p=pdf_newpage(pdf,L,L,"glyph as path");
-    pdf_concat(pdf,1,0,0,1,0,140);
+    pdf_translate(pdf,0,140);
     pdf_setfill(pdf,1.0,0.0,0.0);
     pdf_setfont(pdf,"Helvetica");
-    pdf_text(pdf,"path",0,24,L-80,0,0);
+    pdf_text(pdf,"path",0,24,L-80,0,0,0);
     pdf_setfill(pdf,0.8,0.8,0.8);
     pdf_setstroke(pdf,1.0,0.0,0.0);
     pdf_moveto(pdf,50.25,-46.25);
@@ -93,12 +105,12 @@ int main(void)
     pdf_addgroup(pdf,p,g);
 
     p=pdf_newpage(pdf,L,L,"transparency");
-    pdf_concat(pdf,1,0,0,1,0,140);
+    pdf_translate(pdf,0,140);
     pdf_setfill(pdf,0.0,0.0,0.4);
     pdf_setfont(pdf,"Times-Roman");
-    pdf_text(pdf,"g",0,512,0,0,0);
+    pdf_text(pdf,"g",0,512,0,0,0,0);
     pdf_setfont(pdf,"Helvetica");
-    pdf_text(pdf,"transparency",0,24,L-150,0,0);
+    pdf_text(pdf,"transparency",0,24,L-150,0,0,0);
     pdf_setfill(pdf,1.0,1.0,0.0);
     pdf_setstroke(pdf,0.0,0.0,0.0);
     pdf_setopacity(pdf,0.4);
@@ -107,22 +119,23 @@ int main(void)
     pdf_addgroup(pdf,p,g);
 
     p=pdf_newpage(pdf,L,L,"clipping");
-    pdf_concat(pdf,1,0,0,1,0,140);
+    pdf_translate(pdf,0,140);
     pdf_setfill(pdf,0.0,0.0,0.4);
     pdf_setfont(pdf,"Times-Roman");
-    pdf_text(pdf,"g",0,512,0,0,0);
+    pdf_text(pdf,"g",0,512,0,0,0,0);
     pdf_setfont(pdf,"Helvetica");
-    pdf_text(pdf,"clip",0,24,L-80,0,0);
+    pdf_text(pdf,"clip",0,24,L-80,0,0,0);
     pdf_setfill(pdf,0.6,0.61,0.26);
     pdf_save(pdf);
     pdf_circle(pdf,120,155,100);
     pdf_clip(pdf);
     pdf_setfill(pdf,0.6,0.61,0.26);
     pdf_setfont(pdf,"Times-Roman");
-    pdf_text(pdf,"g",0,512,0,0,0);
+    pdf_text(pdf,"g",0,512,0,0,0,0);
     pdf_restore(pdf);
     pdf_addgroup(pdf,p,g);
 
     pdf_enddoc(pdf);
     return 0;
 }
+
