@@ -1,7 +1,7 @@
 # pdfsg
 
 This is a simple graphics C library that outputs PDF.
-Besides providing a standard modern 2d graphics API and several convenience functions, its main features are:
+Besides providing a standard modern 2d graphics [API](API.md) and several convenience functions, its main features are:
 
 - outputs graphics contents immediately, thus requiring little memory
 - supports groups that can be reused without duplication
