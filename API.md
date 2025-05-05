@@ -118,7 +118,7 @@ void pdf_restore(struct pdf_doc *pdf);
 int pdf_setfont(struct pdf_doc *pdf, const char *font);
 ```
 Sets the current font to the given font.
-Uses the given name as is. No check is made. Better sick to the standard PDF fonts.
+Uses the given name as is. No check is made. Better stick to the standard PDF fonts.
 Returns an opaque ID that can be used in `pdf_text`.
 
 ```
@@ -197,6 +197,7 @@ void pdf_polyline(struct pdf_doc *pdf, float x[], float y[], int n);
 ```
 void pdf_polygon(struct pdf_doc *pdf, float x[], float y[], int n);
 ```
+A polygon is a closed polyline.
 
 ```
 void pdf_ellipse(struct pdf_doc *pdf, float x, float y, float xr, float yr);
@@ -215,5 +216,5 @@ The angle is in degrees.
 ```
 void pdf_addraw(struct pdf_doc *pdf, const char *code);
 ```
-Adds raw code. For the adventurous. Mostly meant for testing.
+Adds raw code. For the adventurous. Mostly meant for testing. See also [raw.c](raw.c).
 
