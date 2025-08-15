@@ -2,7 +2,7 @@
 * pdfsg.c
 * simple graphics library for PDF
 * Luiz Henrique de Figueiredo <lhf@tecgraf.puc-rio.br>
-* 13 Apr 2025 11:35:14
+* 15 Aug 2025 08:45:05
 * This code is hereby placed in the public domain and also under the MIT license
 * Based on public domain code by Andre Renaud: github.com/AndreRenaud/PDFGen
 */
@@ -90,6 +90,7 @@ static struct pdf_obj *pdf_add_object(struct pdf_doc *pdf, int type)
 static struct pdf_obj *find_object(struct pdf_doc *pdf, int index, int type)
 {
     struct pdf_obj *o;
+    if (index == 0) return pdf->last[type];
     for (o = pdf->last[type]; o; o = o->next)
         if (o->index == index) return o;
     for (o = pdf->first[type]; o; o = o->next)
