@@ -1,5 +1,5 @@
-CC= cc -std=c99
-CFLAGS= -O2 -pedantic -Wall -Wextra -Wno-c11-extensions $G
+CC= cc -std=c11
+CFLAGS= -O2 -pedantic -Wall -Wextra
 
 L= pdfsg
 P= glyph
@@ -10,7 +10,7 @@ all:	$P
 	open $O.pdf
 
 $P:	$P.c $L.c $L.h
-	$(CC) $(CFLAGS) -o $P $P.c $L.c $(LIBS)
+	$(CC) $(CFLAGS) -o $P $P.c $L.c -lm
 
 diff:
 	-diff etc/$L.h .
